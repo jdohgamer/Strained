@@ -14,20 +14,9 @@ public class MovePlayer : MonoBehaviour {
     public string controlLocked = "n";
 
 
-    public string[] keywords = new string[] { "fly", "pony", "left", "right" };
-    public ConfidenceLevel confidence = ConfidenceLevel.Medium;
-    protected PhraseRecognizer recognizer;
-    protected string word = "right";
-
-
 	// Use this for initialization
 	void Start () {
-        if (keywords != null)
-        {
-            recognizer = new KeywordRecognizer(keywords, confidence);
-            recognizer.OnPhraseRecognized += Recognizer_OnPhraseRecognized;
-            recognizer.Start();
-        }
+        Renderer rend = GetComponent<Renderer>();
 	}
 	
 	// Update is called once per frame
@@ -48,34 +37,31 @@ public class MovePlayer : MonoBehaviour {
             laneNum += 1;
             controlLocked = "y";
         }
-
-        //switch (word)
-        //{
-        //    case "left":
-        //        horizVel = -2;
-        //        StartCoroutine(stopSlide());
-        //        laneNum -= 1;
-        //        controlLocked = "y";
-        //        break;
-        //    case "right":
-        //        horizVel = -2;
-        //        StartCoroutine(stopSlide());
-        //        laneNum += 1;
-        //        controlLocked = "y";
-        //        break;
-        //}
 	}
 
-    IEnumerator stopSlide()
+	private void OnCollisionEnter(Collision collision)
+	{
+        if (collision.gameObject.tag == "Lethal")
+        {
+            Destroy(gameObject);
+            GM.zVelAdj = 0;
+        }
+        if (collision.gameObject.tag == "Coin")
+        {
+            Destroy(collision.gameObject);
+            GM.coinTotal += 1;
+        }
+        if (collision.gameObject.tag == "PowerUp")
+        {
+            Destroy(collision.gameObject);
+            
+        }
+	}
+
+	IEnumerator stopSlide()
     {
         yield return new WaitForSeconds(.5f);
         horizVel = 0;
         controlLocked = "n";
-    }
-
-    private void Recognizer_OnPhraseRecognized(PhraseRecognizedEventArgs args)
-    {
-        word = args.text;
-        //results.text = "You said: <b>" + word + "</b>";
     }
 }
